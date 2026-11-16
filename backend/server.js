@@ -5,6 +5,7 @@ dotenv.config();
 // Import Express
 const express = require('express');
 const cors = require('cors');
+const db = require('./db')
 
 // Create the Express app
 const app = express();
