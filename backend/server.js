@@ -6,13 +6,14 @@ dotenv.config();
 const express = require('express');
 const cors = require('cors');
 const db = require('./db')
-
+const ticketRoutes = require('./routes/tickets');
 // Create the Express app
 const app = express();
 
 // Middlewares
 app.use(cors());          // Allows the React frontend to talk to this server
 app.use(express.json());  // Allows the server to understand JSON in request bodies
+app.use('/api/tickets', ticketRoutes);
 
 // Define the port (use .env value if set, otherwise default to 5000)
 const PORT = process.env.PORT || 5000;
