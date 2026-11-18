@@ -1,25 +1,29 @@
 const db = require('./db');
+const bcrypt = require('bcryptjs');
 
-// Run seeds after a tiny delay so schema initialization finishes first
 setTimeout(() => {
-    console.log('Seeding initial data...');
+    console.log('Seeding initial data with hashed passwords...');
 
-    // 1. Insert Admin user (password: 'admin123')
+    // Hash the passwords (salt rounds = 10)
+    const adminPasswordHash = bcrypt.hashSync('admin123', 10);
+    const employeePasswordHash = bcrypt.hashSync('user123', 10);
+
+    // 1. Insert or replace users with hashed passwords
     const insertUser = `
-    INSERT OR IGNORE INTO users (id, name, email, password, role)
+    INSERT OR REPLACE INTO users (id, name, email, password, role)
     VALUES 
-      (1, 'Admin User', 'admin@opsdesk.com', 'admin123', 'admin'),
-      (2, 'Jane Employee', 'jane@opsdesk.com', 'user123', 'employee');
+      (1, 'Admin User', 'admin@opsdesk.com', ?, 'admin'),
+      (2, 'Jane Employee', 'jane@opsdesk.com', ?, 'employee');
   `;
 
-    db.run(insertUser, (err) => {
+    db.run(insertUser, [adminPasswordHash, employeePasswordHash], (err) => {
         if (err) {
             console.error('Error inserting sample users:', err.message);
             return;
         }
-        console.log('Sample users seeded (Admin & Employee).');
+        console.log('Sample users seeded with encrypted passwords.');
 
-        // 2. Insert a sample ticket created by Jane (user_id = 2)
+        // 2. Insert sample ticket
         const insertTicket = `
       INSERT OR IGNORE INTO tickets (id, title, description, category, priority, status, user_id)
       VALUES 
