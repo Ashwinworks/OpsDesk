@@ -37,6 +37,30 @@ router.get('/', authenticate, (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────
+// 1b. GET /api/tickets/my -> Explicit endpoint for current user's tickets
+// ─────────────────────────────────────────────────────────────
+router.get('/my', authenticate, (req, res) => {
+  const sql = `
+    SELECT 
+      tickets.*,
+      users.name AS created_by_name,
+      users.email AS created_by_email
+    FROM tickets
+    JOIN users ON tickets.user_id = users.id
+    WHERE tickets.user_id = ?
+    ORDER BY tickets.id DESC
+  `;
+
+  db.all(sql, [req.user.id], (err, rows) => {
+    if (err) {
+      console.error('Error fetching user tickets:', err.message);
+      return res.status(500).json({ error: 'Failed to retrieve personal tickets.' });
+    }
+    res.status(200).json(rows);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
 // 2. GET /api/tickets/:id -> Fetch single ticket (Protected)
 // ─────────────────────────────────────────────────────────────
 router.get('/:id', authenticate, (req, res) => {
